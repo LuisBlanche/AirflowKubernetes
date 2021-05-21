@@ -48,7 +48,8 @@ retrieve the airflow repository
 
 Go inside the repo and check the `chart` folder 
 
-You can directly modify the `values.yaml` with advanced configurations. Here we will just deactivate the authentication for easier local development 
+You can directly modify the `values.yaml` with advanced configurations.
+Deactivate Arflow authentication for easier local development 
 
 ```
     webserverConfig: |
@@ -72,6 +73,22 @@ And
         enable_proxy_fix: 'True'
         authenticate: 'False'
         rbac: 'False'
+```
+
+Enable Git Sync to find the Dags 
+```
+    gitSync:
+      enabled: true
+      ...
+      repo: https://gitlab.com/dataswati-datascience/powerop-ai.git
+      branch: "dev"
+      rev: HEAD
+      root: "/git"
+      dest: "repo"
+      ...
+      subPath: "dags"                       # subdir were dags are stored
+      ..
+      credentialsSecret: git-credentials    # k8s secret name
 ```
 
 **EASY Alternative** :  you can just retrieve the `values.yaml`  from this repo and replace it directly
