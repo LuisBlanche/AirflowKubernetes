@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 git-credentials.txt
+git-credentials.yaml
