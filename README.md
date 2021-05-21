@@ -40,3 +40,40 @@ Helm is the package manager for kubernetes
 ```microk8s helm init --stable-repo-url https://charts.helm.sh/stable``` 
 
 
+1.4 Airflow installation on Kubernetes
+
+retrieve the airflow repository 
+
+```git clone https://github.com/apache/airflow``` 
+
+Go inside the repo and check the `chart` folder 
+
+You can directly modify the `values.yaml` with advanced configurations. Here we will just deactivate the authentication for easier local development 
+
+```
+    webserverConfig: |
+
+      import os
+      from flask_appbuilder.security.manager import AUTH_DB
+      AUTH_ROLE_PUBLIC = 'Admin'
+
+      basedir = os.path.abspath(os.path.dirname(__file__))
+
+      WTF_CSRF_ENABLED = True
+      AUTH_TYPE = AUTH_DB
+```
+
+And 
+
+```
+    config:
+    ...
+      webserver:
+        enable_proxy_fix: 'True'
+        authenticate: 'False'
+        rbac: 'False'
+```
+
+**EASY Alternative** :  you can just retrieve the `values.yaml`  from this repo and replace it directly
+
+
