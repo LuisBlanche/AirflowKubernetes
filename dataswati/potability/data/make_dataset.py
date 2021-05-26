@@ -16,8 +16,8 @@ def main(data_path):
     train = df.drop(unseen.index)
     unseen.reset_index(drop=True, inplace=True)
     train.reset_index(drop=True, inplace=True)
-    train.to_csv(data_path / "interim" / "train.csv")
-    unseen.to_csv(data_path / "interim" / "unseen.csv")
+    train.to_csv(data_path / "interim" / "train.csv", index=False)
+    unseen.to_csv(data_path / "interim" / "unseen.csv", index=False)
 
 
 
