@@ -1,5 +1,6 @@
 from typing import List
-
+import logging
+import fire 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
@@ -16,9 +17,9 @@ def build_features(df: pd.DataFrame, interaction_features: List, bin_features: L
     Returns:
         pd.DataFrame: df with more features
     """
-    df = build_interaction_features(df, interaction_features)
-    df = quantile_binning(df, bin_features)
-    return df
+    features = build_interaction_features(df, interaction_features)
+    features = quantile_binning(features, bin_features)
+    return features 
 
 
 def build_interaction_features(df: pd.DataFrame, interaction_features: List) -> pd.DataFrame:
@@ -32,7 +33,9 @@ def build_interaction_features(df: pd.DataFrame, interaction_features: List) -> 
             colnames.append(interaction_features[np.argmax(row)])
         else:
             colnames.append(" * ".join([interaction_features[i] for i, x in enumerate(list(row)) if x == 1]))
+    logging.info(f"Adding columns {colnames}")
     df[colnames] = interactions
+
     return df
 
 
@@ -40,7 +43,7 @@ def quantile_binning(
     df: pd.DataFrame,
     bin_features: List,
     quantile_list=[0, 0.25, 0.5, 0.75, 1.0],
-    quantile_labels: List = ["0-25Q", "25-50Q", "50-75Q", "75-100Q"],
+    quantile_labels: List = [1, 2, 3, 4],
     as_dummies: bool = False,
 ):
     for feature in bin_features:
@@ -48,6 +51,19 @@ def quantile_binning(
 
         if as_dummies is True:
             dummies = pd.get_dummies(quantiles, prefix=feature)
-            return df.join(dummies)
+            df =  df.join(dummies)
         else:
-            return df.join(quantiles)
+            df = df.join(quantiles, rsuffix='_quantiles')
+    return df 
+
+
+def run(input_path: str, 
+        output_path: str,
+        interaction_features: List=["ph","Hardness","Solids","Chloramines","Sulfate","Conductivity","Organic_carbon","Trihalomethanes","Turbidity"], 
+        bin_features: List=["ph","Hardness","Solids","Chloramines","Sulfate","Conductivity","Organic_carbon","Trihalomethanes","Turbidity"]): 
+    df = pd.read_csv(input_path)
+    df = build_features(df, interaction_features, bin_features)
+    df.to_csv(output_path, index=False)
+
+if __name__ == '__main__':
+    fire.Fire(run)

@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.impute import KNNImputer
+import fire
 
 
 def knn_impute(df: pd.DataFrame, keep_na_indicator: bool = True) -> pd.DataFrame:
@@ -21,3 +22,10 @@ def knn_impute(df: pd.DataFrame, keep_na_indicator: bool = True) -> pd.DataFrame
         df[columns_used_to_impute] = knni.fit_transform(df[columns_used_to_impute])
     return df
 
+def run(input_path: str, output_path: str, keep_na_indicator: bool=True):
+    df = pd.read_csv(input_path)
+    imputed = knn_impute(df, keep_na_indicator)
+    imputed.to_csv(output_path, index=False)
+
+if __name__ == '__main__':
+    fire.Fire(run)
