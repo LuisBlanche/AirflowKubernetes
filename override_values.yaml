@@ -1,0 +1,8 @@
+dags: 
+  gitSync: 
+    enabled: true
+    repo: https://github.com/LuisBlanche/AirflowKubernetes.git
+    branch: "main"
+    rev: HEAD
+    subPath: "dags"
+    # credentialsSecret: git-credentials 
