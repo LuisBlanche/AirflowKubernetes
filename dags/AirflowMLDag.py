@@ -136,7 +136,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     )
 
     build_unseen_features = KubernetesPodOperator(
-        task_id="build_train_features",
+        task_id="build_unseen_features",
         trigger_rule="all_success",
         namespace="default",
         image="dataswatidevops/odsc_python_airflow_k8s",
