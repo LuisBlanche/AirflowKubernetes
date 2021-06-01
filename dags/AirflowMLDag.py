@@ -52,7 +52,12 @@ N_CV = 3
 N_JOBS = 4
 
 
-def WrapperKubernetesPodOperator(task_id: str, cmds: List[str], xcom: bool = True, dag):
+def WrapperKubernetesPodOperator(
+    dag,
+    task_id: str,
+    cmds: List[str],
+    do_xcom_push: bool = True,
+):
     return KubernetesPodOperator(
         task_id=task_id,
         trigger_rule="all_success",
@@ -69,7 +74,7 @@ def WrapperKubernetesPodOperator(task_id: str, cmds: List[str], xcom: bool = Tru
         volumes=[VOLUME_DATA],
         volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
-        do_xcom_push=xcom,
+        do_xcom_push=do_xcom_push,
     )
 
 
@@ -114,8 +119,18 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         do_xcom_push=True,
     )
 
-    build_unseen_features = WrapperKubernetesPodOperator(
-        task_id="build_train_features",
+    build_unseen_features = KubernetesPodOperator(
+        task_id="build_unseen_features",
+        trigger_rule="all_success",
+        namespace="default",
+        image="dataswatidevops/odsc_python_airflow_k8s",
+        labels={"airflow": "operator"},
+        name="airflow-operator-" + str(dag_id) + "-task",
+        in_cluster=True,
+        resources=resources,
+        get_logs=True,
+        is_delete_operator_pod=True,
+        image_pull_policy="Always",
         cmds=[
             f"python potability/features/build_features.py \
                 {{task_instance.xcom_pull(task_ids='impute_unseen_data', key='return_values')['imputed_path]}} \
