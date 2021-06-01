@@ -3,7 +3,7 @@ COPY dataswati /app
 RUN apt-get update \
     && apt install build-essential -y \
     && apt-get clean
-WORKDIR /app
 RUN pip install --upgrade pip && pip install --user -r requirements.txt
-RUN mkdir -p /airflow/xcom && touch /airflow/xcom/return.json 
+RUN mkdir -p /airflow/xcom && touch /airflow/xcom/return.json
 
+# WORKDIR /app

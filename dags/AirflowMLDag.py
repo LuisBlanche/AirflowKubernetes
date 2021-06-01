@@ -80,7 +80,7 @@ def WrapperKubernetesPodOperator(
 with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_active_runs=1) as dag:
     make_dataset = WrapperKubernetesPodOperator(
         task_id="make_dataset",
-        cmds=[f"python potability/data/make_dataset.py {DATA_PATH}"],
+        cmds=[f"python /app/potability/data/make_dataset.py {DATA_PATH}"],
         dag=dag,
         do_xcom_push=True,
     )
@@ -88,7 +88,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     impute_train_data = WrapperKubernetesPodOperator(
         task_id="impute_train_data",
         cmds=[
-            f"python potability/data/impute.py \
+            f"python /app/potability/data/impute.py \
                 {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_features_path]}} \
                     {DATA_PATH}/processed/train_features_imputed.csv"
         ],
@@ -99,7 +99,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     impute_unseen_data = WrapperKubernetesPodOperator(
         task_id="impute_unseen_data",
         cmds=[
-            f"python potability/data/impute.py \
+            f"python /app/potability/data/impute.py \
                 {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['unseen_features_path]}} \
                     {DATA_PATH}/processed/train_features_imputed.csv"
         ],
@@ -110,7 +110,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     build_train_features = WrapperKubernetesPodOperator(
         task_id="build_train_features",
         cmds=[
-            f"python potability/features/build_features.py \
+            f"python /app/potability/features/build_features.py \
                 {{task_instance.xcom_pull(task_ids='impute_train_data', key='return_values')['imputed_path]}} \
                     {DATA_PATH}/processed/train_features.csv"
         ],
@@ -131,7 +131,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         is_delete_operator_pod=True,
         image_pull_policy="Always",
         cmds=[
-            f"python potability/features/build_features.py \
+            f"python /app/potability/features/build_features.py \
                 {{task_instance.xcom_pull(task_ids='impute_unseen_data', key='return_values')['imputed_path]}} \
                     {DATA_PATH}/processed/unseen_features.csv"
         ],
@@ -142,7 +142,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     train_rf = WrapperKubernetesPodOperator(
         task_id="train_rf",
         cmds=[
-            f"python potability/features/train_model.py rf \
+            f"python /app/potability/features/train_model.py rf \
                 {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
                     {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
                         {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
@@ -153,7 +153,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     train_interpret = WrapperKubernetesPodOperator(
         task_id="train_interpret",
         cmds=[
-            f"python potability/features/train_model.py interpret \
+            f"python /app/potability/features/train_model.py interpret \
               {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
               {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
                {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
@@ -164,7 +164,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     train_lgbm = WrapperKubernetesPodOperator(
         task_id="train_lgbm",
         cmds=[
-            f"python potability/features/train_model.py lgbm \
+            f"python /app/potability/features/train_model.py lgbm \
               {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
               {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
                {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
@@ -176,7 +176,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     predict_rf = WrapperKubernetesPodOperator(
         task_id="predict_rf",
         cmds=[
-            f"python potability/models/predict_model.py \
+            f"python /app/potability/models/predict_model.py \
         {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
          {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
              {DATA_PATH}/processed/rf_predictions.csv \
@@ -188,7 +188,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     predict_interpret = WrapperKubernetesPodOperator(
         task_id="predict_interpret",
         cmds=[
-            f"python potability/models/predict_model.py \
+            f"python /app/potability/models/predict_model.py \
         {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
          {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
              {DATA_PATH}/processed/rf_predictions.csv \
@@ -200,7 +200,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     predict_lgbm = WrapperKubernetesPodOperator(
         task_id="predict_lgbm",
         cmds=[
-            f"python potability/models/predict_model.py \
+            f"python /app/potability/models/predict_model.py \
         {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
          {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
              {DATA_PATH}/processed/rf_predictions.csv \
