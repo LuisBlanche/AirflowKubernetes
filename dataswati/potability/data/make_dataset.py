@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import os
 from pathlib import Path
 
 import fire
@@ -11,6 +12,7 @@ def run(data_path_str: str, target_name: str = "Potability"):
     """Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
     """
+    print("Start")
     logger = logging.getLogger(__name__)
     logger.info(f"Spliting unseen and training data in {data_path_str} / interim")
     data_path = Path(data_path_str)
@@ -38,6 +40,7 @@ def run(data_path_str: str, target_name: str = "Potability"):
     }
     with open("/airflow/xcom/return.json", "w") as file:
         json.dump(xcom_return, file)
+    print(os.path.listdir("/airflow/xcom"))
 
 
 def split_features_target(df, target_name):
