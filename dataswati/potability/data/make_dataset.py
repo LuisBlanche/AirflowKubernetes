@@ -31,10 +31,10 @@ def run(data_path_str: str, target_name: str = "Potability"):
     unseen_real_target_path = data_path / "interim" / "unseen_real_target.csv"
     unseen_real_target.to_csv(unseen_real_target_path, index=False)
     xcom_return = {
-        "train_features_path": train_features_path,
-        "train_target_path": train_target_path,
-        "unseen_features_path": unseen_features_path,
-        "unseen_real_target": unseen_real_target,
+        "train_features_path": str(train_features_path),
+        "train_target_path": str(train_target_path),
+        "unseen_features_path": str(unseen_features_path),
+        "unseen_real_target": str(unseen_real_target),
     }
     with open("/airflow/xcom/return.json", "w") as file:
         json.dump(xcom_return, file)
