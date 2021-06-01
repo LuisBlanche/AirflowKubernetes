@@ -67,7 +67,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     )
 
     impute_train_data = KubernetesPodOperator(
-        task_id="make_dataset",
+        task_id="impute_train_data",
         trigger_rule="all_success",
         namespace="default",
         image="dataswatidevops/odsc_python_airflow_k8s",
@@ -88,7 +88,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
     )
 
     impute_unseen_data = KubernetesPodOperator(
-        task_id="make_dataset",
+        task_id="impute_unseen_data",
         trigger_rule="all_success",
         namespace="default",
         image="dataswatidevops/odsc_python_airflow_k8s",
