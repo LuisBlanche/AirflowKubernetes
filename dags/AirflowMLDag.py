@@ -3,7 +3,6 @@ from typing import List
 
 from airflow import DAG
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
-from airflow.opeators import BashOperator
 from airflow.utils.dates import days_ago
 from kubernetes.client import models as k8s
 
