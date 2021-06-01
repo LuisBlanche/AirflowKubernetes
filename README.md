@@ -68,5 +68,4 @@ To access the Web UI => apply the port forwarding as indicated
 microk8s kubectl port-forward svc/airflow2-webserver 8080:8080 --namespace default
 ```
 
-
-
+You can now access to the [Airflow UI](localhost:8080) where you will see the DAG  
