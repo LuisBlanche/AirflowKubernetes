@@ -1,7 +1,9 @@
 from datetime import timedelta
+from typing import List
 
 from airflow import DAG
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
+from airflow.opeators import BashOperator
 from airflow.utils.dates import days_ago
 from kubernetes.client import models as k8s
 
@@ -50,184 +52,155 @@ N_CV = 3
 N_JOBS = 4
 
 
+def WrapperKubernetesPodOperator(task_id: str, cmds: List[str], xcom: bool = True, dag):
+    return KubernetesPodOperator(
+        task_id=task_id,
+        trigger_rule="all_success",
+        namespace="default",
+        image="dataswatidevops/odsc_python_airflow_k8s",
+        labels={"airflow": "operator"},
+        name="airflow-operator-" + str(dag_id) + "-task",
+        in_cluster=True,
+        resources=resources,
+        get_logs=True,
+        is_delete_operator_pod=True,
+        image_pull_policy="Always",
+        cmds=cmds,
+        volumes=[VOLUME_DATA],
+        volume_mounts=[VOLUME_MOUNT_DATA],
+        dag=dag,
+        do_xcom_push=xcom,
+    )
+
+
 with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_active_runs=1) as dag:
-    make_dataset = KubernetesPodOperator(
+    make_dataset = WrapperKubernetesPodOperator(
         task_id="make_dataset",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[f"python potability/data/make_dataset.py {DATA_PATH}"],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
 
-    impute_train_data = KubernetesPodOperator(
+    impute_train_data = WrapperKubernetesPodOperator(
         task_id="impute_train_data",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
-            f"python potability/data/impute.py {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_features_path]}} {DATA_PATH}/processed/train_features_imputed.csv"
+            f"python potability/data/impute.py \
+                {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_features_path]}} \
+                    {DATA_PATH}/processed/train_features_imputed.csv"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
 
-    impute_unseen_data = KubernetesPodOperator(
+    impute_unseen_data = WrapperKubernetesPodOperator(
         task_id="impute_unseen_data",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
-            f"python potability/data/impute.py {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['unseen_features_path]}} {DATA_PATH}/processed/train_features_imputed.csv"
+            f"python potability/data/impute.py \
+                {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['unseen_features_path]}} \
+                    {DATA_PATH}/processed/train_features_imputed.csv"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
 
-    build_train_features = KubernetesPodOperator(
+    build_train_features = WrapperKubernetesPodOperator(
         task_id="build_train_features",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
             f"python potability/features/build_features.py \
                 {{task_instance.xcom_pull(task_ids='impute_train_data', key='return_values')['imputed_path]}} \
                     {DATA_PATH}/processed/train_features.csv"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
 
-    build_unseen_features = KubernetesPodOperator(
+    build_unseen_features = WrapperKubernetesPodOperator(
         task_id="build_train_features",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
             f"python potability/features/build_features.py \
                 {{task_instance.xcom_pull(task_ids='impute_unseen_data', key='return_values')['imputed_path]}} \
                     {DATA_PATH}/processed/unseen_features.csv"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
 
-    train_rf = KubernetesPodOperator(
+    train_rf = WrapperKubernetesPodOperator(
         task_id="train_rf",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
             f"python potability/features/train_model.py rf \
-              {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
-              {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
-               {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
+                {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
+                    {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
+                        {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
-    train_interpret = KubernetesPodOperator(
+    train_interpret = WrapperKubernetesPodOperator(
         task_id="train_interpret",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
             f"python potability/features/train_model.py interpret \
               {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
               {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
                {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
-    train_lgbm = KubernetesPodOperator(
+    train_lgbm = WrapperKubernetesPodOperator(
         task_id="train_lgbm",
-        trigger_rule="all_success",
-        namespace="default",
-        image="dataswatidevops/odsc_python_airflow_k8s",
-        labels={"airflow": "operator"},
-        name="airflow-operator-" + str(dag_id) + "-task",
-        in_cluster=True,
-        resources=resources,
-        get_logs=True,
-        is_delete_operator_pod=True,
-        image_pull_policy="Always",
         cmds=[
             f"python potability/features/train_model.py lgbm \
               {{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path]}} \
               {{task_instance.xcom_pull(task_ids='make_dataset', key='return_values')['train_target_path]}} \
                {MODELS_PATH} {N_ITER} {N_JOBS} {N_CV}"
         ],
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=True,
     )
+
+    predict_rf = WrapperKubernetesPodOperator(
+        task_id="predict_rf",
+        cmds=[
+            f"python potability/models/predict_model.py \
+        {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
+         {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
+             {DATA_PATH}/processed/rf_predictions.csv \
+                 {MODELS_PATH} rf"
+        ],
+        dag=dag,
+        do_xcom_push=True,
+    )
+    predict_interpret = WrapperKubernetesPodOperator(
+        task_id="predict_interpret",
+        cmds=[
+            f"python potability/models/predict_model.py \
+        {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
+         {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
+             {DATA_PATH}/processed/rf_predictions.csv \
+                 {MODELS_PATH} interpret"
+        ],
+        dag=dag,
+        do_xcom_push=True,
+    )
+    predict_lgbm = WrapperKubernetesPodOperator(
+        task_id="predict_lgbm",
+        cmds=[
+            f"python potability/models/predict_model.py \
+        {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
+         {{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path]}} \
+             {DATA_PATH}/processed/rf_predictions.csv \
+                 {MODELS_PATH} lightgbm"
+        ],
+        dag=dag,
+        do_xcom_push=True,
+    )
+
+
 make_dataset >> [impute_train_data, impute_unseen_data]
 impute_train_data >> build_train_features
 impute_unseen_data >> build_unseen_features
 build_train_features >> [train_rf, train_interpret, train_lgbm]
+train_rf >> predict_rf
+train_interpret >> predict_interpret
+train_lgbm >> predict_lgbm
