@@ -5,4 +5,5 @@ RUN apt-get update \
     && apt-get clean
 WORKDIR /app
 RUN pip install --upgrade pip && pip install --user -r requirements.txt
+RUN mkdir -p /airflow/xcom && touch /airflow/xcom/return.json 
 
