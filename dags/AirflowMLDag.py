@@ -38,7 +38,7 @@ with DAG(dag_id=dag_id, default_args= default_args, schedule_interval=None, max_
     make_dataset = KubernetesPodOperator(task_id='make_dataset',
                                          trigger_rule='all_success', 
                                          namespace='default', 
-                                         image="dataswatidevops/odsc_python_airflow_k8s:main",
+                                         image="dataswatidevops/odsc_python_airflow_k8s",
                                          labels={"airflow": "operator"},
                                          name="airflow-operator-" + str(dag_id) + "-task",
                                          in_cluster=True,
