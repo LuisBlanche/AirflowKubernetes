@@ -46,7 +46,7 @@ with DAG(dag_id=dag_id, default_args= default_args, schedule_interval=None, max_
                                          get_logs=True,
                                          is_delete_operator_pod=True,
                                          image_pull_policy="Always",
-                                         cmd=[f"python -m potability/data/make_dataset.py {DATA_PATH}/raw {DATA_PATH}/interim"],
+                                         cmds=[f"python -m potability/data/make_dataset.py {DATA_PATH}/raw {DATA_PATH}/interim"],
                                          volumes=[VOLUME_DATA],
                                          volume_mounts=[VOLUME_MOUNT_DATA],
                                          dag=dag,
