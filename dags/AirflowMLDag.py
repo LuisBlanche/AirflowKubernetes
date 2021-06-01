@@ -215,6 +215,6 @@ make_dataset >> [impute_train_data, impute_unseen_data]
 impute_train_data >> build_train_features
 impute_unseen_data >> build_unseen_features
 build_train_features >> [train_rf, train_interpret, train_lgbm]
-train_rf >> predict_rf
-train_interpret >> predict_interpret
-train_lgbm >> predict_lgbm
+[train_rf, build_unseen_features] >> predict_rf
+[train_interpret, build_unseen_features] >> predict_interpret
+[train_lgbm, build_unseen_features] >> predict_lgbm
