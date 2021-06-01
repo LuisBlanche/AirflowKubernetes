@@ -1,6 +1,8 @@
-from typing import List
+import json
 import logging
-import fire 
+from typing import List
+
+import fire
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
@@ -19,7 +21,7 @@ def build_features(df: pd.DataFrame, interaction_features: List, bin_features: L
     """
     features = build_interaction_features(df, interaction_features)
     features = quantile_binning(features, bin_features)
-    return features 
+    return features
 
 
 def build_interaction_features(df: pd.DataFrame, interaction_features: List) -> pd.DataFrame:
@@ -51,19 +53,45 @@ def quantile_binning(
 
         if as_dummies is True:
             dummies = pd.get_dummies(quantiles, prefix=feature)
-            df =  df.join(dummies)
+            df = df.join(dummies)
         else:
-            df = df.join(quantiles, rsuffix='_quantiles')
-    return df 
+            df = df.join(quantiles, rsuffix="_quantiles")
+    return df
 
 
-def run(input_path: str, 
-        output_path: str,
-        interaction_features: List=["ph","Hardness","Solids","Chloramines","Sulfate","Conductivity","Organic_carbon","Trihalomethanes","Turbidity"], 
-        bin_features: List=["ph","Hardness","Solids","Chloramines","Sulfate","Conductivity","Organic_carbon","Trihalomethanes","Turbidity"]): 
+def run(
+    input_path: str,
+    output_path: str,
+    interaction_features: List = [
+        "ph",
+        "Hardness",
+        "Solids",
+        "Chloramines",
+        "Sulfate",
+        "Conductivity",
+        "Organic_carbon",
+        "Trihalomethanes",
+        "Turbidity",
+    ],
+    bin_features: List = [
+        "ph",
+        "Hardness",
+        "Solids",
+        "Chloramines",
+        "Sulfate",
+        "Conductivity",
+        "Organic_carbon",
+        "Trihalomethanes",
+        "Turbidity",
+    ],
+):
     df = pd.read_csv(input_path)
     df = build_features(df, interaction_features, bin_features)
     df.to_csv(output_path, index=False)
+    xcom_return = {"features_path": output_path}
+    with open("/airflow/xcom/return.json", "w") as file:
+        json.dump(xcom_return, file)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     fire.Fire(run)

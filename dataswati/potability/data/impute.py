@@ -1,3 +1,5 @@
+import json
+
 import fire
 import pandas as pd
 from sklearn.impute import KNNImputer
@@ -27,6 +29,9 @@ def run(input_path: str, output_path: str, keep_na_indicator: bool = True):
     df = pd.read_csv(input_path)
     imputed = knn_impute(df, keep_na_indicator)
     imputed.to_csv(output_path, index=False)
+    xcom_return = {"imputed_path": output_path}
+    with open("/airflow/xcom/return.json", "w") as file:
+        json.dump(xcom_return, file)
 
 
 if __name__ == "__main__":
