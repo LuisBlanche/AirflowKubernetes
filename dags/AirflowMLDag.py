@@ -15,8 +15,8 @@ default_args = {
 
 def get_volume_components(
     dag_id,
-    host_path="/home/dev/Luis/odsc/AirflowKubernetes/dataswati/data",
-    container_path="/tmp",
+    host_path="/home/dev/Luis/odsc/AirflowKubernetes/dataswati/data", # PUT YOU OWN PATH HERE 
+    container_path="/app/data",
     volume_name="hostpath-volume",
 ):
     volume_data = k8s.V1Volume(name=volume_name, host_path=k8s.V1HostPathVolumeSource(path=host_path, type="Directory"))
@@ -31,7 +31,7 @@ VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(dag_id=dag_id, container_
 
 
 resources = k8s.V1ResourceRequirements(requests={"memory": "1Gi", "cpu": "1",}, limits={"cpu": 2,},)
-DATA_PATH = "/home/dev/Luis/odsc/AirflowKubernetes/dataswati/data"
+DATA_PATH = "/app/data"
 
 
 with DAG(dag_id=dag_id, default_args= default_args, schedule_interval=None, max_active_runs=1) as dag:
@@ -46,7 +46,7 @@ with DAG(dag_id=dag_id, default_args= default_args, schedule_interval=None, max_
                                          get_logs=True,
                                          is_delete_operator_pod=True,
                                          image_pull_policy="Always",
-                                         cmds=[f"python -m potability/data/make_dataset.py {DATA_PATH}/raw {DATA_PATH}/interim"],
+                                         cmds=[f"python potability/data/make_dataset.py {DATA_PATH}"],
                                          volumes=[VOLUME_DATA],
                                          volume_mounts=[VOLUME_MOUNT_DATA],
                                          dag=dag,
