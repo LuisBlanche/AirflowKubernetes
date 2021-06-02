@@ -9,8 +9,13 @@ import pandas as pd
 
 
 def run(data_path_str: str, target_name: str = "Potability"):
-    """Runs data processing scripts to turn raw data from (../raw) into
-    cleaned data ready to be analyzed (saved in ../processed).
+    """This will take in a zipped csv located at datapath and split it to build
+    the different parts of data needed for the ML pipeline (traininng features and target, and unseen data features and
+    target)
+
+    Args:
+        data_path_str (str): data folder pat
+        target_name (str, optional): Column name for the target. Defaults to "Potability".
     """
     print("Start")
     logger = logging.getLogger(__name__)
@@ -40,10 +45,19 @@ def run(data_path_str: str, target_name: str = "Potability"):
     }
     with open("/airflow/xcom/return.json", "w") as file:
         json.dump(xcom_return, file)
-    print(os.path.listdir("/airflow/xcom"))
+    print(os.listdir("/airflow/xcom"))
 
 
-def split_features_target(df, target_name):
+def split_features_target(df: pd.DataFrame, target_name: str):
+    """Splits a dataframe between its features and target
+
+    Args:
+        df (pd.DataFrame): machine learning dataframe
+        target_name (str): Column name for the target
+
+    Returns:
+        pd.DataFrame, pd.Series: splitted features and target
+    """
     target = df[target_name]
     features = df.drop(columns=[target_name])
     return features, target
