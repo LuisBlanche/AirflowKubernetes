@@ -30,7 +30,7 @@ def get_volume_components(
 
 dag_id = "Airflow_ML_k8s"
 
-VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(dag_id=dag_id, container_path="/tmp")
+VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components()
 
 
 resources = k8s.V1ResourceRequirements(
