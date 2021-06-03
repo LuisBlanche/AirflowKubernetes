@@ -31,8 +31,12 @@ def get_volume_components(
 dag_id = "Airflow_ML_k8s"
 HOST_PATH = "home/dev/Luis/odsc/AirflowKubernetes/dataswati"
 
-VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(f"{HOST_PATH}/data")
-VOLUME_MODELS, VOLUME_MOUNT_MODELS = get_volume_components(f"{HOST_PATH}/models")
+VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(
+    f"{HOST_PATH}/data", container_path="/app/data", volume_name="data"
+)
+VOLUME_MODELS, VOLUME_MOUNT_MODELS = get_volume_components(
+    f"{HOST_PATH}/models", container_path="/app/models", volume_name="models"
+)
 
 
 resources = k8s.V1ResourceRequirements(
