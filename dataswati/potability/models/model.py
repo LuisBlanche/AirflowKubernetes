@@ -8,6 +8,8 @@ from sklearn.model_selection import RandomizedSearchCV
 
 
 class PotabilityModel:
+    """Wrapper class that handles different types of ML model and random grid search training"""
+
     def __init__(self, model: str) -> None:
         if model == "interpret":
             self.model = ExplainableBoostingClassifier()
@@ -20,6 +22,15 @@ class PotabilityModel:
         return f"This a {self.model} model"
 
     def gridsearch(self, X, y, n_iter=100, n_jobs=1, cv=3):
+        """Operates a random grid search
+
+        Args:
+            X (pd.DataFrame): Features
+            y (pd.Series): target
+            n_iter (int, optional): number of randdom iteration. Defaults to 100.
+            n_jobs (int, optional): number of parallel jobs. Defaults to 1.
+            cv (int, optional): cross validation folds. Defaults to 3.
+        """
         random_grid = self._get_random_grid_search()
         rscv = RandomizedSearchCV(
             estimator=self.model, param_distributions=random_grid, n_iter=n_iter, cv=cv, verbose=2, n_jobs=n_jobs
