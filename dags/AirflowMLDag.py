@@ -147,7 +147,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             N_CV,
         ],
         dag=dag,
-        do_xcom_push=True,
+        do_xcom_push=False,
     )
     train_interpret = WrapperKubernetesPodOperator(
         task_id="train_interpret",
@@ -163,7 +163,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             N_CV,
         ],
         dag=dag,
-        do_xcom_push=True,
+        do_xcom_push=False,
     )
     train_lgbm = WrapperKubernetesPodOperator(
         task_id="train_lgbm",
@@ -179,7 +179,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             N_CV,
         ],
         dag=dag,
-        do_xcom_push=True,
+        do_xcom_push=False,
     )
 
     predict_rf = WrapperKubernetesPodOperator(
@@ -194,7 +194,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "rf",
         ],
         dag=dag,
-        do_xcom_push=True,
+        do_xcom_push=False,
     )
     predict_interpret = WrapperKubernetesPodOperator(
         task_id="predict_interpret",
@@ -208,7 +208,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "interpret",
         ],
         dag=dag,
-        do_xcom_push=True,
+        do_xcom_push=False,
     )
     predict_lgbm = WrapperKubernetesPodOperator(
         task_id="predict_lgbm",
@@ -222,7 +222,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "lightgbm",
         ],
         dag=dag,
-        do_xcom_push=True,
+        do_xcom_push=False,
     )
 
 
