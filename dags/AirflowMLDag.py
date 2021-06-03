@@ -29,8 +29,10 @@ def get_volume_components(
 
 
 dag_id = "Airflow_ML_k8s"
+HOST_PATH = "home/dev/Luis/odsc/AirflowKubernetes/dataswati"
 
-VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components()
+VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(f"{HOST_PATH}/data")
+VOLUME_MODELS, VOLUME_MOUNT_MODELS = get_volume_components(f"{HOST_PATH}/models")
 
 
 resources = k8s.V1ResourceRequirements(
@@ -68,8 +70,8 @@ def WrapperKubernetesPodOperator(
         is_delete_operator_pod=True,
         image_pull_policy="Always",
         cmds=cmds,
-        volumes=[VOLUME_DATA],
-        volume_mounts=[VOLUME_MOUNT_DATA],
+        volumes=[VOLUME_DATA, VOLUME_MODELS],
+        volume_mounts=[VOLUME_MOUNT_DATA, VOLUME_MOUNT_MODELS],
         dag=dag,
         do_xcom_push=do_xcom_push,
         startup_timeout_seconds=200,
