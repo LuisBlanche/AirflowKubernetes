@@ -44,6 +44,7 @@ def run(data_path_str: str, target_name: str = "Potability"):
         "unseen_real_target": str(unseen_real_target_path),
     }
     with open("/airflow/xcom/return.json", "w") as file:
+        logging.info(f"Sending xcom : {xcom_return}")
         json.dump(xcom_return, file)
     print(os.listdir("/airflow/xcom"))
 

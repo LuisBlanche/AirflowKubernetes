@@ -85,10 +85,14 @@ def run(
         "Turbidity",
     ],
 ):
+    logging.info(f"Reading data from {input_path}")
+
     df = pd.read_csv(input_path)
     df = build_features(df, interaction_features, bin_features)
     df.to_csv(output_path, index=False)
     xcom_return = {"features_path": output_path}
+    logging.info(f"Sending xcom : {xcom_return}")
+
     with open("/airflow/xcom/return.json", "w") as file:
         json.dump(xcom_return, file)
 

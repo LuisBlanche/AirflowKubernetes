@@ -1,4 +1,5 @@
 import json
+import logging
 
 import fire
 import pandas as pd
@@ -26,10 +27,13 @@ def knn_impute(df: pd.DataFrame, keep_na_indicator: bool = True) -> pd.DataFrame
 
 
 def run(input_path: str, output_path: str, keep_na_indicator: bool = True):
+    logging.info(f"Reading data from {input_path}")
     df = pd.read_csv(input_path)
     imputed = knn_impute(df, keep_na_indicator)
     imputed.to_csv(output_path, index=False)
     xcom_return = {"imputed_path": output_path}
+    logging.info(f"Sending xcom : {xcom_return}")
+
     with open("/airflow/xcom/return.json", "w") as file:
         json.dump(xcom_return, file)
 

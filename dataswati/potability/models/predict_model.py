@@ -1,3 +1,4 @@
+import logging
 import os
 
 import fire
@@ -17,6 +18,9 @@ def run(
     model_path: str,
     model_type: str,
 ):
+    logging.info(f"Reading unseen data from {unseen_features_input_path}")
+    logging.info(f"Reading real target data from {unseen_target_input_path}")
+
     unseen_features = pd.read_csv(unseen_features_input_path)
     unseen_target = pd.read_csv(unseen_target_input_path)
     model = load_model(model_path, model_type)

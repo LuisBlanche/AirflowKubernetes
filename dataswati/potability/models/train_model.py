@@ -1,4 +1,5 @@
 import json
+import logging
 
 import fire
 import pandas as pd
@@ -14,6 +15,8 @@ def run(
     n_jobs: int,
     cv: int,
 ):
+    logging.info(f"Reading training data from {train_datapath}")
+    logging.info(f"Reading target data from {target_datapath}")
     X = pd.read_csv(train_datapath)
     y = pd.read_csv(target_datapath)
 
@@ -21,6 +24,8 @@ def run(
     best_model = pm.gridsearch(X, y, n_iter, n_jobs, cv)
     pm.save_best_model(model_output_path)
     xcom_return = {"model_output_path": model_output_path}
+    logging.info(f"Sending xcom : {xcom_return}")
+
     with open("/airflow/xcom/return.json", "w") as file:
         json.dump(xcom_return, file)
 
