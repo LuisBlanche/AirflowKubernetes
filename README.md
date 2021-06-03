@@ -1,4 +1,16 @@
-# AirflowKubernetes
+# Build an ML Pipeline with Airflow and Kubernetes 
+## Introduction 
+This repo was designed for ODSC Europe Workshop : [Build an ML Pipeline with Airflow and Kubernetes](https://staging6.odsc.com/speakers/build-an-ml-pipeline-with-airflow-and-kubernetes/)
+
+### What's in there 
+All the code material for the workshop : 
+
+* The ml code is in the [dataswati](dataswati) folder and is about fitting a water Potability classifier using a [dataset from Kaggle](https://www.kaggle.com/adityakadiwal/water-potability) 
+* The airflow Dag code is it the [dags](dag) folder (we activate airflow git-sync to retrieve this code) 
+* The [Dockerfile](Dockerfile) to build the image that is used by the KubernetesPodOperator and synchronized with [Docker Hub](https://hub.docker.com/repository/docker/dataswatidevops/odsc_python_airflow_k8s)
+* [override_values.yaml](override_values.yaml) allows to override the [airflow helm chart](https://github.com/apache/airflow/tree/main/chart) to activate git-sync with the dag folder 
+
+
 
 ## 1. Installation 
 
