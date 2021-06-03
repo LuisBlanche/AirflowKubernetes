@@ -47,7 +47,7 @@ class PotabilityModel:
         self.best_cv_model.fit(X, y)
 
     def save_best_model(self):
-        joblib.dump(self, self.model_path / {self.model_type} / "potability.joblib")
+        joblib.dump(self, self.model_path / self.model_type / "potability.joblib")
 
     def predict(self, X):
         return self.best_cv_model.predict(X)
