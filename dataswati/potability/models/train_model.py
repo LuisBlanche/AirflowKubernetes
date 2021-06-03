@@ -19,7 +19,7 @@ def run(
     X = pd.read_csv(train_datapath)
     y = pd.read_csv(target_datapath)
 
-    pm = PotabilityModel(model_output_path, model_type)
+    pm = PotabilityModel(model_type, model_output_path)
     _ = pm.gridsearch(X, y, n_iter, n_jobs, cv)
     pm.save_best_model()
     logging.info(f"Model saved in: {pm.model_path}")
