@@ -137,7 +137,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         task_id="train_rf",
         cmds=[
             "python",
-            "/app/potability/features/train_model.py",
+            "/app/potability/models/train_model.py",
             "rf",
             "{{ task_instance.xcom_pull(task_ids='build_train_features', key='return_value')['features_path'] }}",
             "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path'] }}",
@@ -153,7 +153,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         task_id="train_interpret",
         cmds=[
             "python",
-            "/app/potability/features/train_model.py",
+            "/app/potability/models/train_model.py",
             "interpret",
             "{{ task_instance.xcom_pull(task_ids='build_train_features', key='return_value')['features_path'] }}",
             "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path'] }}",
@@ -169,7 +169,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         task_id="train_lgbm",
         cmds=[
             "python",
-            "/app/potability/features/train_model.py",
+            "/app/potability/models/train_model.py",
             "lgbm",
             "{{task_instance.xcom_pull(task_ids='build_train_features', key='return_value')['features_path']}}",
             "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path']}}",
