@@ -29,7 +29,7 @@ def get_volume_components(
 
 
 dag_id = "Airflow_ML_k8s"
-HOST_PATH = "home/dev/Luis/odsc/AirflowKubernetes/dataswati"
+HOST_PATH = "/home/dev/Luis/odsc/AirflowKubernetes/dataswati"
 
 VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(
     f"{HOST_PATH}/data", container_path="/app/data", volume_name="data"
