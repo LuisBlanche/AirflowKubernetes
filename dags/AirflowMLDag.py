@@ -30,7 +30,7 @@ def get_volume_components(
     return volume_data, volume_mount_data
 
 
-dag_id = "Aiflow_ML_k8s"
+dag_id = "Airflow_ML_k8s"
 
 VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(dag_id=dag_id, container_path="/tmp")
 
@@ -74,6 +74,7 @@ def WrapperKubernetesPodOperator(
         volume_mounts=[VOLUME_MOUNT_DATA],
         dag=dag,
         do_xcom_push=do_xcom_push,
+        startup_timeout_seconds=200,
     )
 
 
