@@ -15,7 +15,6 @@ default_args = {
 
 
 def get_volume_components(
-    dag_id,
     host_path="/home/dev/Luis/odsc/AirflowKubernetes/dataswati/data",  # PUT YOU OWN PATH HERE
     container_path="/app/data",
     volume_name="hostpath-volume",
@@ -25,7 +24,6 @@ def get_volume_components(
         mount_path=container_path,
         name=volume_name,
         read_only=False,
-        sub_path=f"dag_{dag_id}",
     )
     return volume_data, volume_mount_data
 
@@ -104,7 +102,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         cmds=[
             "python",
             "/app/potability/data/impute.py",
-            "{{task_instance.xcom_pull(task_ids='make_dataset',  key='return_value')['unseen_features_path'])}}",
+            "{{ task_instance.xcom_pull(task_ids='make_dataset',  key='return_value')['unseen_features_path'] }}",
             f"{DATA_PATH}/processed/train_features_imputed.csv",
         ],
         dag=dag,
@@ -116,7 +114,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         cmds=[
             "python",
             "/app/potability/features/build_features.py",
-            "{{task_instance.xcom_pull(task_ids='impute_train_data', key='return_value')['imputed_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='impute_train_data', key='return_value')['imputed_path'] }}",
             f"{DATA_PATH}/processed/train_features.csv",
         ],
         dag=dag,
@@ -128,7 +126,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         cmds=[
             "python",
             "/app/potability/features/build_features.py",
-            "{{task_instance.xcom_pull(task_ids='impute_unseen_data', key='return_value')['imputed_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='impute_unseen_data', key='return_value')['imputed_path'] }}",
             f"{DATA_PATH}/processed/unseen_features.csv",
         ],
         dag=dag,
@@ -141,8 +139,8 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "python",
             "/app/potability/features/train_model.py",
             "rf",
-            "{{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path']}}",
-            "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path'] }}",
+            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path'] }}",
             MODELS_PATH,
             N_ITER,
             N_JOBS,
@@ -157,8 +155,8 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "python",
             "/app/potability/features/train_model.py",
             "interpret",
-            "{{task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path']}}",
-            "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='build_train_features', key='return_values')['features_path'] }}",
+            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path'] }}",
             MODELS_PATH,
             N_ITER,
             N_JOBS,
@@ -189,8 +187,8 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         cmds=[
             "python",
             "/app/potability/models/predict_model.py",
-            "{{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path']}}",
-            "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_target_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path'] }}",
+            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_target_path'] }}",
             f"{DATA_PATH}/processed/rf_predictions.csv",
             MODELS_PATH,
             "rf",
@@ -203,8 +201,8 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         cmds=[
             "python",
             "/app/potability/models/predict_model.py",
-            "{{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path']}}",
-            "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_target_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path'] }}",
+            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_target_path'] }}",
             f"{DATA_PATH}/processed/interpret_predictions.csv",
             MODELS_PATH,
             "interpret",
@@ -217,8 +215,8 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         cmds=[
             "python",
             "/app/potability/models/predict_model.py",
-            "{{task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path']}}",
-            "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_target_path']}}",
+            "{{ task_instance.xcom_pull(task_ids='build_unseen_features', key='return_values')['features_path'] }}",
+            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_target_path'] }}",
             f"{DATA_PATH}/processed/lgbm_predictions.csv",
             MODELS_PATH,
             "lgbm",
