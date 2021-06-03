@@ -59,7 +59,7 @@ class PotabilityModel:
         plot_confusion_matrix(self.best_cv_model, X_test, y_test)
 
         plt.savefig(self.model_path / "confusion_matrix.png")
-        self.save_feature_importance(X_test, y_test, self.model_path)
+        self.save_feature_importance(X_test, y_test)
 
     def save_feature_importance(self, X_test, y_test):
 
