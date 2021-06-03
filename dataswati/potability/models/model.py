@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import joblib
 import matplotlib.pyplot as plt
@@ -13,15 +14,15 @@ from sklearn.model_selection import RandomizedSearchCV
 
 
 class PotabilityModel:
-    def __init__(self, model: str) -> None:
-        if model == "interpret":
-            self.model_type = "interpret"
+    def __init__(self, model_type: str, model_path: str) -> None:
+        self.model_type = model_type
+        self.model_path = Path(model_path) / self.model_type
+        self.model_path.mkdir(parents=True, exist_ok=True)
+        if model_type == "interpret":
             self.initial_model = ExplainableBoostingClassifier()
-        elif model == "rf":
-            self.model_type = "rf"
+        elif model_type == "rf":
             self.initial_model = RandomForestClassifier()
-        elif model == "lightgbm":
-            self.model_type = "lightgbm"
+        elif model_type == "lightgbm":
             self.initial_model = LGBMClassifier()
 
     def __repr__(self) -> str:
@@ -45,21 +46,22 @@ class PotabilityModel:
     def fit(self, X, y):
         self.best_cv_model.fit(X, y)
 
-    def save_best_model(self, model_path: str = "models"):
-        joblib.dump(self, f"{model_path}/{self.model_type}/potability.joblib")
+    def save_best_model(self):
+        joblib.dump(self, self.model_path / {self.model_type} / "potability.joblib")
 
     def predict(self, X):
         return self.best_cv_model.predict(X)
 
-    def evaluate(self, X_test, y_test, model_path: str = "models"):
+    def evaluate(self, X_test, y_test):
         y_pred = self.predict(X_test)
         print(f"Model accuracy = {accuracy_score(y_test.values, y_pred)}")
         print(f"Model F1 Score= {f1_score(y_test.values, y_pred)}")
         plot_confusion_matrix(self.best_cv_model, X_test, y_test)
-        plt.savefig(os.path.join(model_path, self.model_type, "confusion_matrix.png"))
-        self.save_feature_importance(X_test, y_test, model_path)
 
-    def save_feature_importance(self, X_test, y_test, model_path: str = "models"):
+        plt.savefig(self.model_path / "confusion_matrix.png")
+        self.save_feature_importance(X_test, y_test, self.model_path)
+
+    def save_feature_importance(self, X_test, y_test):
 
         result = permutation_importance(self.best_cv_model, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
         sorted_idx = result.importances_mean.argsort()
@@ -67,12 +69,11 @@ class PotabilityModel:
         ax.boxplot(result.importances[sorted_idx].T, vert=False, labels=X_test.columns[sorted_idx])
         ax.set_title("Permutation Importances (test set)")
         fig.tight_layout()
-        plt.savefig(os.path.join(model_path, self.model_type, "feature_importance.png"))
+        plt.savefig(self.model_path / "feature_importance.png")
         if self.model_type == "interpret":
             ebm_global = self.best_cv_model.explain_global()
             for i, feature in enumerate(X_test.columns):
-                with open(os.path.join(model_path, self.model_type, feature), "w") as f:
-                    ebm_global.visualize(i).write_html(os.path.join(model_path, self.model_type, f"{feature}.html"))
+                ebm_global.visualize(i).write_html(self.model_path / f"{feature}.html")
 
     def _get_random_grid_search(self):
         # RF

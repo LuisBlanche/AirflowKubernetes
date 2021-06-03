@@ -1,4 +1,3 @@
-import json
 import logging
 
 import fire
@@ -20,15 +19,10 @@ def run(
     X = pd.read_csv(train_datapath)
     y = pd.read_csv(target_datapath)
 
-    pm = PotabilityModel(model_type)
-    best_model = pm.gridsearch(X, y, n_iter, n_jobs, cv)
-    pm.save_best_model(model_output_path)
-    xcom_return = {"model_output_path": model_output_path}
-    logging.info(f"Sending xcom : {xcom_return}")
-
-    with open("/airflow/xcom/return.json", "w") as file:
-        json.dump(xcom_return, file)
-
+    pm = PotabilityModel(model_output_path, model_type)
+    _ = pm.gridsearch(X, y, n_iter, n_jobs, cv)
+    pm.save_best_model()
+    logging.info(f"Model saved in: {pm.model_path}"
 
 if __name__ == "__main__":
     fire.Fire(run)
