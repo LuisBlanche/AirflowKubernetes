@@ -103,7 +103,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "python",
             "/app/potability/data/impute.py",
             "{{ task_instance.xcom_pull(task_ids='make_dataset',  key='return_value')['unseen_features_path'] }}",
-            f"{DATA_PATH}/processed/train_features_imputed.csv",
+            f"{DATA_PATH}/processed/unseen_features_imputed.csv",
         ],
         dag=dag,
         do_xcom_push=True,
