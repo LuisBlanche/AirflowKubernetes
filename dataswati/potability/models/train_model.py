@@ -22,7 +22,8 @@ def run(
     pm = PotabilityModel(model_output_path, model_type)
     _ = pm.gridsearch(X, y, n_iter, n_jobs, cv)
     pm.save_best_model()
-    logging.info(f"Model saved in: {pm.model_path}"
+    logging.info(f"Model saved in: {pm.model_path}")
+
 
 if __name__ == "__main__":
     fire.Fire(run)
