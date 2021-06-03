@@ -79,6 +79,18 @@ def WrapperKubernetesPodOperator(
 
 
 with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_active_runs=1) as dag:
+    test_cmd1 = WrapperKubernetesPodOperator(
+        task_id="make_dataset",
+        cmds=["sh", "-c", "echo YOOLO"],
+        dag=dag,
+        do_xcom_push=True,
+    )
+    test_cmd = WrapperKubernetesPodOperator(
+        task_id="make_dataset",
+        cmds=["python", "/app/potability/data/make_dataset.py", DATA_PATH],
+        dag=dag,
+        do_xcom_push=True,
+    )
     make_dataset = WrapperKubernetesPodOperator(
         task_id="make_dataset",
         cmds=[f"python /app/potability/data/make_dataset.py {DATA_PATH}"],
