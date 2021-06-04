@@ -73,7 +73,7 @@ class PotabilityModel:
         if self.model_type == "interpret":
             ebm_global = self.best_cv_model.explain_global()
             for i, feature in enumerate(X_test.columns):
-                ebm_global.visualize(i).write_html(self.model_path / f"{feature}.html")
+                ebm_global.visualize(i).write_html(str(self.model_path / f"{feature}.html"))
 
     def _get_random_grid_search(self):
         # RF

@@ -196,7 +196,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             "{{ task_instance.xcom_pull(task_ids='build_unseen_features', key='return_value')['features_path'] }}",
             "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_real_target'] }}",
             f"{DATA_PATH}/processed/rf_predictions.csv",
-            f"{MODELS_PATH}/rf/potability.joblib" "rf",
+            f"{MODELS_PATH}/rf/potability.joblib",
         ],
         dag=dag,
         do_xcom_push=False,
