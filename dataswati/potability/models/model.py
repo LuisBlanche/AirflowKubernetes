@@ -14,10 +14,12 @@ from sklearn.model_selection import RandomizedSearchCV
 
 
 class PotabilityModel:
-    def __init__(self, model_type: str, model_path: str) -> None:
+    def __init__(self, model_type: str, model_path: str, use_interactions: bool = True) -> None:
         self.model_type = model_type
         self.model_path = Path(model_path) / self.model_type
         self.model_path.mkdir(parents=True, exist_ok=True)
+        self.use_interactions = use_interactions
+
         if model_type == "interpret":
             self.initial_model = ExplainableBoostingClassifier()
         elif model_type == "rf":
@@ -29,6 +31,8 @@ class PotabilityModel:
         return f"This a {self.model_type} model"
 
     def gridsearch(self, X, y, n_iter=100, n_jobs=1, cv=3):
+        if self.use_interactions is False:
+            X = self._drop_interactions(X)
         random_grid = self._get_random_grid_search()
         rscv = RandomizedSearchCV(
             estimator=self.initial_model,
@@ -44,15 +48,21 @@ class PotabilityModel:
         self.best_cv_model = rscv.best_estimator_
 
     def fit(self, X, y):
+        if self.use_interactions is False:
+            X = self._drop_interactions(X)
         self.best_cv_model.fit(X, y)
 
     def save_best_model(self):
         joblib.dump(self, self.model_path / "potability.joblib")
 
     def predict(self, X):
+        if self.use_interactions is False:
+            X = self._drop_interactions(X)
         return self.best_cv_model.predict(X)
 
     def evaluate(self, X_test, y_test):
+        if self.use_interactions is False:
+            X_test = self._drop_interactions(X_test)
         y_pred = self.predict(X_test)
         print(f"Model accuracy = {accuracy_score(y_test.values, y_pred)}")
         print(f"Model F1 Score= {f1_score(y_test.values, y_pred)}")
@@ -62,7 +72,8 @@ class PotabilityModel:
         self.save_feature_importance(X_test, y_test)
 
     def save_feature_importance(self, X_test, y_test):
-
+        if self.use_interactions is False:
+            X_test = self._drop_interactions(X_test)
         result = permutation_importance(self.best_cv_model, X_test, y_test, n_repeats=10, random_state=42, n_jobs=2)
         sorted_idx = result.importances_mean.argsort()
         fig, ax = plt.subplots()
@@ -74,6 +85,10 @@ class PotabilityModel:
             ebm_global = self.best_cv_model.explain_global()
             for i, feature in enumerate(X_test.columns):
                 ebm_global.visualize(i).write_html(str(self.model_path / f"{feature}.html"))
+
+    def _drop_interactions(self, X, sep=" * "):
+        X = X[[col for col in X.columns if " * " not in col]]
+        return X
 
     def _get_random_grid_search(self):
         # RF
