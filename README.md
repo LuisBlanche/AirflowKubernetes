@@ -1,4 +1,6 @@
 # Build an ML Pipeline with Airflow and Kubernetes 
+**This work is supported by [Dataswati](https://www.dataswati.com/)**
+
 ## Introduction 
 This repo was designed for ODSC Europe Workshop : [Build an ML Pipeline with Airflow and Kubernetes](https://staging6.odsc.com/speakers/build-an-ml-pipeline-with-airflow-and-kubernetes/)
 
@@ -81,3 +83,26 @@ microk8s kubectl port-forward svc/airflow2-webserver 8080:8080 --namespace defau
 ```
 
 You can now access to the [Airflow UI](localhost:8080) where you will see the DAG  
+
+
+## 2. The Machine Learning Part 
+
+## 2.1 Airflow DAG 
+![image](https://user-images.githubusercontent.com/18741447/120769392-5d998e00-c51d-11eb-8c65-52580d199282.png)
+
+Typical Machine Learning Pipeline : there is training data and unseen data, both dataset go through the same transformations (imputation and feature engineering) and then the training data is used for training different models with random hyperparameter search with crossvalidation only the best model of each type is kept and they are use to make a prediction on the unseen data (at the same time we can evaluate the predictions because we actually have the targets for the unseen data) 
+
+
+## 2.2 ML Code 
+
+This part of the repository was generated using [Coookiecutter Datascience](https://drivendata.github.io/cookiecutter-data-science/) that allows scaffolding of a data science project in a matter of minutes and brings cool functionalities with a lot of helpers. 
+The code is split into 3 submodules : 
+* [data](dataswati/potability/data) where we treat the existing data,
+* [features](dataswati/potability/features) where we add new features to the data
+* [models](dataswati/potability/models) where we create and train ML models and use them for prediction. 
+
+
+## 2.3 The dataset 
+
+Here we use a dataset from Kaggle : [Water Potability](https://www.kaggle.com/adityakadiwal/water-potability). The advantage is to have access to the notebooks on Kaggle that give a baseline for prediction score and cool EDAs, you can also access a pandas profiling report and a pycaret tests in the [exploration notebook](notebooks/exploration.html) 
+
