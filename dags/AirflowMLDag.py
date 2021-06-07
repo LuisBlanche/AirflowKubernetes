@@ -15,7 +15,7 @@ default_args = {
 
 
 def get_volume_components(
-    host_path="/home/dev/Luis/odsc/AirflowKubernetes/dataswati/data",  # PUT YOU OWN PATH HERE
+    host_path="/home/dev/Luis/odsc/AirflowKubernetes/dataswati/data",
     container_path="/app/data",
     volume_name="hostpath-volume",
 ):
@@ -29,7 +29,7 @@ def get_volume_components(
 
 
 dag_id = "Airflow_ML_k8s"
-HOST_PATH = "/home/dev/Luis/odsc/AirflowKubernetes/dataswati"
+HOST_PATH = "/home/luis/Code/ODSC_AirflowK8s/AirflowKubernetes/dataswati"  # PUT YOU OWN PATH HERE
 
 VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(
     f"{HOST_PATH}/data", container_path="/app/data", volume_name="data"
