@@ -167,7 +167,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
             N_ITER,
             N_JOBS,
             N_CV,
-            False,
+            "False",
         ],
         dag=dag,
         do_xcom_push=False,

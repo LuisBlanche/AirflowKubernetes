@@ -13,14 +13,14 @@ def run(
     n_iter: int,
     n_jobs: int,
     cv: int,
-    use_interactions: bool = True,
+    use_interactions: str = "true",
 ):
     logging.info(f"Reading training data from {train_datapath}")
     logging.info(f"Reading target data from {target_datapath}")
     X = pd.read_csv(train_datapath)
 
     y = pd.read_csv(target_datapath)
-
+    use_interactions = True if use_interactions == "true" else False
     pm = PotabilityModel(model_type, model_output_path, use_interactions)
     _ = pm.gridsearch(X, y, n_iter, n_jobs, cv)
     pm.save_best_model()
