@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import List
 
 from airflow import DAG
+from airflow.models import Variable 
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.utils.dates import days_ago
 from kubernetes.client import models as k8s
@@ -29,7 +30,7 @@ def get_volume_components(
 
 
 dag_id = "Airflow_ML_k8s"
-HOST_PATH = "/home/luis/Code/ODSC_AirflowK8s/AirflowKubernetes/dataswati"  # PUT YOU OWN PATH HERE
+HOST_PATH = Variable.get("HOST_PATH")  # PUT YOU OWN PATH HERE
 
 VOLUME_DATA, VOLUME_MOUNT_DATA = get_volume_components(
     f"{HOST_PATH}/data", container_path="/app/data", volume_name="data"
