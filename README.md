@@ -91,8 +91,13 @@ microk8s kubectl port-forward svc/airflow2-webserver 8080:8080 --namespace defau
 
 You can now access to the [Airflow UI](localhost:8080) where you will see the DAG  
 
+### 1.5 Last **important** step : set you host path as an Airflow Variable
 
-## 2. The Machine Learning Part 
+Go to Admin => Variable and create a variable called `HOST_PÄTH` with the path to you dataswati folder (eg: `/home/Luis/dev/odsc/AirflowKubernetes/dataswati`)
+
+This will be important to determine where on your computer the volumes will be synced with 
+
+## 2. Machine Learning  
 
 ## 2.1 Airflow DAG 
 ![image](https://user-images.githubusercontent.com/18741447/120769392-5d998e00-c51d-11eb-8c65-52580d199282.png)
