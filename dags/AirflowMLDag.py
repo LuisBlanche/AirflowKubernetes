@@ -78,7 +78,7 @@ def WrapperKubernetesPodOperator(
         volume_mounts=[VOLUME_MOUNT_DATA, VOLUME_MOUNT_MODELS],
         dag=dag,
         do_xcom_push=do_xcom_push,
-        startup_timeout_seconds=200,
+        startup_timeout_seconds=600,
     )
 
 
