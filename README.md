@@ -68,12 +68,19 @@ microk8s helm init --stable-repo-url https://charts.helm.sh/stable
 
 
 ### 1.4 Airflow installation on Kubernetes
+See the [doc for official airflow Helm chart](https://airflow.apache.org/docs/helm-chart/stable/index.html)
 
 Use the -f to override values in the official aiflow chart with [override_values.yaml](override_values.yaml). This will enable `git-sync` to allow airflow to get the dags from the [dags](dags) folder 
 
 ```
+microk8s helm3 repo add apache-airflow https://airflow.apache.org 
+```
+
+
+```
 microk8s helm3 install airflow2 apache-airflow/airflow -f AirflowKubernetes/override_values.yaml
 ```
+
 
 
 To access the Web UI => apply the port forwarding as indicated 
