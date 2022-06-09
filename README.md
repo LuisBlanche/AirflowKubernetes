@@ -93,7 +93,7 @@ You can now access to the [Airflow UI](localhost:8080) where you will see the DA
 
 ### 1.5 Last **important** step : set you host path as an Airflow Variable
 
-Go to Admin => Variable and create a variable called `HOST_PÄTH` with the path to you dataswati folder (eg: `/home/Luis/dev/odsc/AirflowKubernetes/dataswati`)
+Go to Admin => Variable and create a variable called `HOST_PATH` with the path to you dataswati folder (eg: `/home/Luis/dev/odsc/AirflowKubernetes/dataswati`)
 
 This will be important to determine where on your computer the volumes will be synced with 
 
