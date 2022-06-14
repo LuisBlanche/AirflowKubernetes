@@ -156,40 +156,7 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         dag=dag,
         do_xcom_push=False,
     )
-    train_interpret = WrapperKubernetesPodOperator(
-        task_id="train_interpret",
-        cmds=[
-            "python",
-            "/app/potability/models/train_model.py",
-            "interpret",
-            "{{ task_instance.xcom_pull(task_ids='build_train_features', key='return_value')['features_path'] }}",
-            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path'] }}",
-            MODELS_PATH,
-            N_ITER,
-            N_JOBS,
-            N_CV,
-            "False",
-        ],
-        dag=dag,
-        do_xcom_push=False,
-    )
-    train_lgbm = WrapperKubernetesPodOperator(
-        task_id="train_lgbm",
-        cmds=[
-            "python",
-            "/app/potability/models/train_model.py",
-            "lightgbm",
-            "{{task_instance.xcom_pull(task_ids='build_train_features', key='return_value')['features_path']}}",
-            "{{task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['train_target_path']}}",
-            MODELS_PATH,
-            N_ITER,
-            N_JOBS,
-            N_CV,
-        ],
-        dag=dag,
-        do_xcom_push=False,
-    )
-
+    
     predict_rf = WrapperKubernetesPodOperator(
         task_id="predict_rf",
         cmds=[
@@ -203,38 +170,9 @@ with DAG(dag_id=dag_id, default_args=default_args, schedule_interval=None, max_a
         dag=dag,
         do_xcom_push=False,
     )
-    predict_interpret = WrapperKubernetesPodOperator(
-        task_id="predict_interpret",
-        cmds=[
-            "python",
-            "/app/potability/models/predict_model.py",
-            "{{ task_instance.xcom_pull(task_ids='build_unseen_features', key='return_value')['features_path'] }}",
-            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_real_target'] }}",
-            f"{DATA_PATH}/processed/interpret_predictions.csv",
-            f"{MODELS_PATH}/interpret/potability.joblib",
-        ],
-        dag=dag,
-        do_xcom_push=False,
-    )
-    predict_lgbm = WrapperKubernetesPodOperator(
-        task_id="predict_lgbm",
-        cmds=[
-            "python",
-            "/app/potability/models/predict_model.py",
-            "{{ task_instance.xcom_pull(task_ids='build_unseen_features', key='return_value')['features_path'] }}",
-            "{{ task_instance.xcom_pull(task_ids='make_dataset', key='return_value')['unseen_real_target'] }}",
-            f"{DATA_PATH}/processed/lightgbm_predictions.csv",
-            f"{MODELS_PATH}/lightgbm/potability.joblib",
-        ],
-        dag=dag,
-        do_xcom_push=False,
-    )
-
 
 make_dataset >> [impute_train_data, impute_unseen_data]
 impute_train_data >> build_train_features
 impute_unseen_data >> build_unseen_features
-build_train_features >> [train_rf, train_interpret, train_lgbm]
+build_train_features >> train_rf
 [train_rf, build_unseen_features] >> predict_rf
-[train_interpret, build_unseen_features] >> predict_interpret
-[train_lgbm, build_unseen_features] >> predict_lgbm

@@ -5,8 +5,6 @@ from pathlib import Path
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
-from interpret.glassbox import ExplainableBoostingClassifier
-from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import accuracy_score, f1_score, plot_confusion_matrix
@@ -19,13 +17,9 @@ class PotabilityModel:
         self.model_path = Path(model_path) / self.model_type
         self.model_path.mkdir(parents=True, exist_ok=True)
         self.use_interactions = use_interactions
-
-        if model_type == "interpret":
-            self.initial_model = ExplainableBoostingClassifier()
-        elif model_type == "rf":
+        if model_type == "rf":
             self.initial_model = RandomForestClassifier()
-        elif model_type == "lightgbm":
-            self.initial_model = LGBMClassifier()
+
 
     def __repr__(self) -> str:
         return f"This a {self.model_type} model"
@@ -98,16 +92,6 @@ class PotabilityModel:
         min_samples_split = [2, 5, 10]
         min_samples_leaf = [1, 2, 4]
         bootstrap = [True, False]
-        # LightGBM
-        learning_rate = [x for x in np.linspace(0.01, 1, num=10)]
-        boosting_type = ["gbdt", "dart", "goss"]
-        sub_feature = [x for x in np.linspace(0.01, 1, num=10)]
-        num_leaves = [int(x) for x in np.linspace(20, 300, num=10)]
-        min_data = [int(x) for x in np.linspace(10, 110, num=11)]
-        # ExplainableBoosting
-        max_bins = [int(x) for x in np.linspace(start=128, stop=1024, num=6)]
-        binning = ["uniform", "quantile", "quantile_humanized"]
-        interactions = [int(x) for x in np.linspace(10, 110, num=11)]
 
         if self.model_type == "rf":
             return {
@@ -117,22 +101,4 @@ class PotabilityModel:
                 "min_samples_split": min_samples_split,
                 "min_samples_leaf": min_samples_leaf,
                 "bootstrap": bootstrap,
-            }
-        elif self.model_type == "lightgbm":
-            return {
-                "learning_rate": learning_rate,
-                "boosting_type": boosting_type,
-                "sub_feature": sub_feature,
-                "num_leaves": num_leaves,
-                "min_data": min_data,
-                "max_depth": max_depth,
-            }
-        elif self.model_type == "interpret":
-            return {
-                "learning_rate": learning_rate,
-                "max_bins": max_bins,
-                "min_samples_leaf": min_samples_leaf,
-                "binning": binning,
-                "interactions": interactions,
-                "max_rounds": [int(x) for x in np.linspace(start=1000, stop=6000, num=10)],
             }
