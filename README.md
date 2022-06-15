@@ -61,10 +61,6 @@ Helm is the package manager for kubernetes
 ```
 microk8s enable helm3 dns storage
 ```
-```
-microk8s helm init --stable-repo-url https://charts.helm.sh/stable
-``` 
-
 
 
 ### 1.4 Airflow installation on Kubernetes
